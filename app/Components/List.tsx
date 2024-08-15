@@ -5,6 +5,7 @@ import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import { useState, useEffect } from "react";
 import PlaceDetailsComponent from "./PlaceDetails";
+
 const ListComponent = () => {
   // State for selected category and rating
   const [selectedCategory, setSelectedCategory] =
@@ -35,8 +36,7 @@ const ListComponent = () => {
       label: "Attraction",
     },
   ];
-
-  // Ratings array
+  // Ratings array  
   const ratings = [
     {
       value: "",
@@ -64,22 +64,7 @@ const ListComponent = () => {
     },
   ];
 
-  // GET data from places
-  useEffect(() => {
-    const handleGetData = async () => {
-      try {
-        const res = await fetch("/api/restaurantData");
-        const data = await res.json();
-        if (res.ok) {
-          setPlaces(data);
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    };
 
-    //handleGetData();
-  }, []);
   
   console.log("places", places)
   // Handle changes to category selection

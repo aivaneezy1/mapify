@@ -1,33 +1,84 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 
-export const GET = async (request: NextRequest) => {
-  const url =
-    "https://travel-advisor.p.rapidapi.com/restaurants/list-in-boundary?bl_latitude=11.847676&tr_latitude=12.838442&bl_longitude=109.095887&tr_longitude=109.149359&lang=en_US";
+type handleApiProps = {
+  lat: string;
+  long: string;
+  radius: number;
+  categories: string;
+};
+
+
+
+
+// Define TypeScript interfaces for place data
+interface Location {
+  formatted_address?: string;
+}
+
+interface Photo {
+  prefix: string;
+  suffix: string;
+}
+
+interface Place {
+  name: string;
+  rating?: number;
+  location?: Location;
+  photos?: Photo[];
+}
+
+interface SearchResult {
+  results: Place[];
+}
+
+// Define TypeScript interfaces for the formatted response
+interface FormattedPlace {
+  name: string;
+  address: string;
+  rating: string;
+  pictures: string[];
+}
+
+export const GET = async () => {
   const options = {
     method: "GET",
     headers: {
-      "x-rapidapi-key": "9fb2021882msh171e8240522b6d4p1ba2b0jsnf7b0f2d14298",
-      "x-rapidapi-host": "travel-advisor.p.rapidapi.com",
+      accept: "application/json",
+      Authorization: "fsq3QLwaaaOEJE3+jK9EjRMJb6uv7AM/T/kzqaXyRszIs+Q=", // Use your actual Foursquare API key
     },
   };
 
   try {
-    const response = await fetch(url, options);
-    const result = await response.json(); // Parse the response as JSON
+    // Specify the fields you want to return in the response
+    const fields = "name,rating,location,photos";
 
-    // Assuming `result.data` contains an array of restaurant objects
-    // Adjust this based on the actual structure of the API response
-    const restaurantsArray = result.data;
+    // Include the fields parameter in the API request
+    const res = await fetch(
+      `https://api.foursquare.com/v3/places/search?ll=43.7085,10.3987&radius=2000&categories=4d4b7105d754a06374d81259&fields=${fields}`,
+      options
+    );
+    const result: SearchResult = await res.json(); // Parse the response as JSON and use the SearchResult type
 
-    if (Array.isArray(restaurantsArray)) {
-      return NextResponse.json(restaurantsArray, { status: 200 });
+    // Extract only the necessary information
+    const formattedPlaces: FormattedPlace[] = result.results.map(place => ({
+      name: place.name,
+      address: place.location?.formatted_address || "No address available",
+      rating: place.rating ? place.rating.toString() : "No rating available",
+      pictures: place.photos ? place.photos.map(photo => `${photo.prefix}original${photo.suffix}`) : []
+    }));
+
+    if (Array.isArray(formattedPlaces)) {
+      return NextResponse.json(formattedPlaces, { status: 200 });
     } else {
       // If the data is not an array, return an empty array or handle as needed
       return NextResponse.json([], { status: 200 });
     }
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 };
