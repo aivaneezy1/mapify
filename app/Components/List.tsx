@@ -3,14 +3,14 @@ import * as React from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PlaceDetailsComponent from "./PlaceDetails";
 const ListComponent = () => {
   // State for selected category and rating
   const [selectedCategory, setSelectedCategory] =
     useState<string>("restaurant");
   const [selectedRating, setSelectedRating] = useState<string>("5");
-
+  const [places, setPlaces] = useState<string>("");
   // Categories array
   const categories = [
     {
@@ -64,84 +64,24 @@ const ListComponent = () => {
     },
   ];
 
-  const restaurantList = [
-    {
-      name: "cool restuarant",
-      rating: "4",
-    },
+  // GET data from places
+  useEffect(() => {
+    const handleGetData = async () => {
+      try {
+        const res = await fetch("/api/restaurantData");
+        const data = await res.json();
+        if (res.ok) {
+          setPlaces(data);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
 
-     {
-      name: "cool beefsteak",
-      rating: "4",
-    },
-
-     {
-      name: "cool fastfood",
-      rating: "4",
-    },
-
-     {
-      name: "cool bbq",
-      rating: "4",
-    },
-
-       {
-      name: "cool seafood",
-      rating: "4",
-    },
-
-     {
-      name: "cool restuarant",
-      rating: "4",
-    },
-
-     {
-      name: "cool beefsteak",
-      rating: "4",
-    },
-
-     {
-      name: "cool fastfood",
-      rating: "4",
-    },
-
-     {
-      name: "cool bbq",
-      rating: "4",
-    },
-
-       {
-      name: "cool seafood",
-      rating: "4",
-    },
-
-
-     {
-      name: "cool restuarant",
-      rating: "4",
-    },
-
-     {
-      name: "cool beefsteak",
-      rating: "4",
-    },
-
-     {
-      name: "cool fastfood",
-      rating: "4",
-    },
-
-     {
-      name: "cool bbq",
-      rating: "4",
-    },
-
-       {
-      name: "cool seafood",
-      rating: "4",
-    },
-  ];
-
+    //handleGetData();
+  }, []);
+  
+  console.log("places", places)
   // Handle changes to category selection
   const handleCategoryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedCategory(event.target.value);
@@ -166,7 +106,7 @@ const ListComponent = () => {
         noValidate
         autoComplete="off"
       >
-        <div>
+        <div className="mt-5">
           {/* Category Dropdown */}
           <TextField
             id="outlined-select-category"
@@ -204,12 +144,7 @@ const ListComponent = () => {
           </TextField>
         </div>
 
-      {/*Calling the palceDetails */}
-        {restaurantList.length > 0 && restaurantList.map((item,index)=>(
-          <div key={index}>
-          <PlaceDetailsComponent placeName={item.name} placeRating={item.rating} />
-          </div>
-        ) )}
+        {/*Calling the palceDetails */}
       </Box>
     </div>
   );

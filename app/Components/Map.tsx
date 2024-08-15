@@ -6,12 +6,14 @@ import SearchBar from "./SearchBar";
 const apiKey: string | undefined = process.env.NEXT_PUBLIC_MAPS_API_KEY;
 
 const MapComponent = () => {
+  // Longitude – the vertical lines
+  // Latitude - the orizzontal lines
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [marker, setMarker] =
     useState<google.maps.marker.AdvancedMarkerElement | null>(null);
 
-  useEffect(() => {
+   useEffect(() => {
     const initMap = async () => {
       const loader = new Loader({
         apiKey: apiKey as string,
@@ -95,7 +97,40 @@ const MapComponent = () => {
           markerInstance.position = newLocation;
         }
       });
+
+      // Function to get the map bounds and coordinates
+      const getMapBounds = () => {
+        const bounds = mapInstance.getBounds();
+        if (bounds) {
+          const ne = bounds.getNorthEast(); // Top-right coordinates
+          const sw = bounds.getSouthWest(); // Bottom-left coordinates
+
+          const tr_latitude = ne.lat();
+          const tr_longitude = ne.lng();
+          const bl_latitude = sw.lat();
+          const bl_longitude = sw.lng();
+          console.log(
+            `bl_latitude=${bl_latitude}&bl_longitude=${bl_longitude}&tr_latitude=${tr_latitude}&tr_longitude=${tr_longitude}`
+          );
+          return {
+            bl_latitude: bl_latitude,
+            bl_longitude: bl_longitude,
+            tr_latitude: tr_latitude,
+            tr_longitude: tr_longitude,
+          };
+        }
+        return null;
+      };
+
+      mapInstance.addListener("bounds_changed", () => {
+        const bounds = getMapBounds();
+        if (bounds) {
+          // Use the bounds to make API requests or update your UI
+          console.log(bounds);
+        }
+      });
     };
+
 
     initMap();
   }, []);
