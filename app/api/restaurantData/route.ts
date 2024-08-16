@@ -8,9 +8,6 @@ type handleApiProps = {
   categories: string;
 };
 
-
-
-
 // Define TypeScript interfaces for place data
 interface Location {
   formatted_address?: string;
@@ -40,12 +37,12 @@ interface FormattedPlace {
   pictures: string[];
 }
 
-export const GET = async () => {
+export const GET = async ({lat,long,radius,categories}: handleApiProps) => {
   const options = {
     method: "GET",
     headers: {
       accept: "application/json",
-      Authorization: "fsq3QLwaaaOEJE3+jK9EjRMJb6uv7AM/T/kzqaXyRszIs+Q=", // Use your actual Foursquare API key
+      Authorization: "fsq3QLwaaaOEJE3+jK9EjRMJb6uv7AM/T/kzqaXyRszIs+Q=", 
     },
   };
 

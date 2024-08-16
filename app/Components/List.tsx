@@ -5,13 +5,23 @@ import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import { useState, useEffect } from "react";
 import PlaceDetailsComponent from "./PlaceDetails";
+import Image from "next/image";
+
+
+
+type PlaceType  = {
+  name: string
+  address: string
+  rating: string
+  pictures: string[]
+}
 
 const ListComponent = () => {
   // State for selected category and rating
   const [selectedCategory, setSelectedCategory] =
     useState<string>("restaurant");
   const [selectedRating, setSelectedRating] = useState<string>("5");
-  const [places, setPlaces] = useState<string>("");
+  const [places, setPlaces] = useState<PlaceType[] | null>(null);
   // Categories array
   const categories = [
     {
@@ -65,8 +75,22 @@ const ListComponent = () => {
   ];
 
 
+  useEffect(() =>{
+    const handleGetData = async() =>{
+      try{
+        const res = await fetch("/api/restaurantData");
+        const data = await res.json();
+        if(res.ok){
+          setPlaces(data);
+        }
+      }catch(err){
+        console.log(err)
+      }
+    }
+    handleGetData();
+  },[])
   
-  console.log("places", places)
+
   // Handle changes to category selection
   const handleCategoryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedCategory(event.target.value);
@@ -78,7 +102,7 @@ const ListComponent = () => {
   };
 
   return (
-    <div>
+    <div className="">
       <h2 className="text-2xl font-semibold whitespace-normal">
         Find Restaurants, Hotels, Parking & Attractions.
       </h2>
@@ -130,6 +154,21 @@ const ListComponent = () => {
         </div>
 
         {/*Calling the palceDetails */}
+
+        { places && places.length > 0 && places.map((item,index) => (
+          <div key={index} className="flex gap-10">
+        
+           <PlaceDetailsComponent
+           name={item.name}
+           address={item.address}
+           rating={item.rating}
+           pictures={item.pictures}
+
+           />
+       
+          </div>
+        ))}
+       
       </Box>
     </div>
   );
