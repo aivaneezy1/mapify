@@ -7,20 +7,19 @@ import { useState, useEffect } from "react";
 import PlaceDetailsComponent from "./PlaceDetails";
 import Image from "next/image";
 
-
-
-type PlaceType  = {
-  name: string
-  address: string
-  rating: string
-  pictures: string[]
-}
+type PlaceType = {
+  name: string;
+  address: string;
+  rating: string;
+  pictures: string[];
+};
 
 const ListComponent = () => {
   // State for selected category and rating
   const [selectedCategory, setSelectedCategory] =
     useState<string>("restaurant");
   const [selectedRating, setSelectedRating] = useState<string>("5");
+  const [selectedRadius, setSelectedRadius] = useState<string>("0");
   const [places, setPlaces] = useState<PlaceType[] | null>(null);
   // Categories array
   const categories = [
@@ -46,7 +45,7 @@ const ListComponent = () => {
       label: "Attraction",
     },
   ];
-  // Ratings array  
+  // Ratings array
   const ratings = [
     {
       value: "",
@@ -74,22 +73,47 @@ const ListComponent = () => {
     },
   ];
 
+  const radius = [
+    {
+      value: "",
+      label: "Select a radius",
+    },
+    {
+      value: "500",
+      label: "0.5 km",
+    },
+    {
+      value: "1000",
+      label: "1 km",
+    },
+    {
+      value: "2000",
+      label: "2 km",
+    },
+    {
+      value: "5000",
+      label: "5 km",
+    },
+    {
+      value: "10000",
+      label: "10 km",
+    },
+  ];
 
-  useEffect(() =>{
-    const handleGetData = async() =>{
-      try{
+  useEffect(() => {
+    const handleGetData = async () => {
+      try {
         const res = await fetch("/api/restaurantData");
         const data = await res.json();
-        if(res.ok){
+        if (res.ok) {
           setPlaces(data);
         }
-      }catch(err){
-        console.log(err)
+      } catch (err) {
+        console.log(err);
       }
-    }
-    handleGetData();
-  },[])
-  
+    };
+    //handleGetData();
+  }, []);
 
   // Handle changes to category selection
   const handleCategoryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,6 +125,10 @@ const ListComponent = () => {
     setSelectedRating(event.target.value);
   };
 
+  // Handle changes to radius selection
+  const handleRadiusChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedRadius(event.target.value);
+  };
   return (
     <div className="">
       <h2 className="text-2xl font-semibold whitespace-normal">
@@ -153,22 +181,37 @@ const ListComponent = () => {
           </TextField>
         </div>
 
+        <TextField
+          id="outlined-select-radius"
+          select
+          label="Select Radius"
+          value={selectedRadius}
+          onChange={handleRadiusChange}
+          helperText={`Selected: ${
+            radius.find((r) => r.value === selectedRadius)?.label
+          }`}
+        >
+          {radius.map((option) => (
+            <MenuItem key={option.value} value={option.value}>
+              {option.label}
+            </MenuItem>
+          ))}
+        </TextField>
+
         {/*Calling the palceDetails */}
 
-        { places && places.length > 0 && places.map((item,index) => (
-          <div key={index} className="flex gap-10">
-        
-           <PlaceDetailsComponent
-           name={item.name}
-           address={item.address}
-           rating={item.rating}
-           pictures={item.pictures}
-
-           />
-       
-          </div>
-        ))}
-       
+        {places &&
+          places.length > 0 &&
+          places.map((item, index) => (
+            <div key={index} className="flex gap-10">
+              <PlaceDetailsComponent
+                name={item.name}
+                address={item.address}
+                rating={item.rating}
+                pictures={item.pictures}
+              />
+            </div>
+          ))}
       </Box>
     </div>
   );

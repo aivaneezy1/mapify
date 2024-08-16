@@ -47,6 +47,7 @@ const PlaceDetailsComponent = ({
   return (
     <div className="flex flex-col items-center justify-center space-y-6 p-6 bg-yellow-100 rounded-lg shadow-lg w-full sm:max-w-sm sm:ml-20 relative mt-5 mb-5">
       <Carousel setApi={setApi} className="w-full max-w-xs">
+      {pictures.length > 0 ? (
         <CarouselContent>
           {pictures.map((src, index) => (
             <CarouselItem key={index}>
@@ -66,6 +67,8 @@ const PlaceDetailsComponent = ({
             </CarouselItem>
           ))}
         </CarouselContent>
+      ) : <h2 className="text-center">No Media Avaibleable</h2>}
+        
         <div
           onClick={(e) => e.preventDefault()}
           className="absolute left-0 top-1/2 transform -translate-y-1/2"
@@ -86,7 +89,7 @@ const PlaceDetailsComponent = ({
       <div className="text-center space-y-1">
         <h2 className="text-xl font-semibold text-gray-800">{name}</h2>
         <h2 className="text-sm text-gray-600">{address}</h2>
-        <h2 className="text-sm text-gray-600">Rating: {rating}</h2>
+        <h2 className="text-sm text-gray-600"><span className="font-semibold">Rating:</span> {rating}</h2>
       </div>
     </div>
   );

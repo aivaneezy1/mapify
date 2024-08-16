@@ -1,3 +1,4 @@
+import PlaceDetailsComponent from "@/app/Components/PlaceDetails";
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 
@@ -9,6 +10,18 @@ type handleApiProps = {
 };
 
 // Define TypeScript interfaces for place data
+
+
+interface Geocode {
+  latitude: number;
+  longitude: number;
+}
+
+interface Geocodes {
+  main: Geocode;
+}
+
+
 interface Location {
   formatted_address?: string;
 }
@@ -21,6 +34,7 @@ interface Photo {
 interface Place {
   name: string;
   rating?: number;
+  geocodes?: Geocodes; // Add this line
   location?: Location;
   photos?: Photo[];
 }
@@ -33,16 +47,23 @@ interface SearchResult {
 interface FormattedPlace {
   name: string;
   address: string;
+  lat?: number;
+  lng?: number;
   rating: string;
   pictures: string[];
 }
 
-export const GET = async ({lat,long,radius,categories}: handleApiProps) => {
+export const GET = async ({
+  lat,
+  long,
+  radius,
+  categories,
+}: handleApiProps) => {
   const options = {
     method: "GET",
     headers: {
       accept: "application/json",
-      Authorization: "fsq3QLwaaaOEJE3+jK9EjRMJb6uv7AM/T/kzqaXyRszIs+Q=", 
+      Authorization: "fsq3QLwaaaOEJE3+jK9EjRMJb6uv7AM/T/kzqaXyRszIs+Q=",
     },
   };
 
@@ -56,13 +77,17 @@ export const GET = async ({lat,long,radius,categories}: handleApiProps) => {
       options
     );
     const result: SearchResult = await res.json(); // Parse the response as JSON and use the SearchResult type
-
+  
     // Extract only the necessary information
-    const formattedPlaces: FormattedPlace[] = result.results.map(place => ({
+    const formattedPlaces: FormattedPlace[] = result.results.map((place) => ({
       name: place.name,
       address: place.location?.formatted_address || "No address available",
       rating: place.rating ? place.rating.toString() : "No rating available",
-      pictures: place.photos ? place.photos.map(photo => `${photo.prefix}original${photo.suffix}`) : []
+      pictures: place.photos
+        ? place.photos.map((photo) => `${photo.prefix}original${photo.suffix}`)
+        : [],
+      lat: place.geocodes?.main.latitude || 0,
+      lng: place.geocodes?.main.longitude || 0,
     }));
 
     if (Array.isArray(formattedPlaces)) {
