@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "./Components/Navbar";
-
+import DataContextProvider from "./context/Provider";
 
 // export const metadata: Metadata = {
 //   title: "Create Next App",
@@ -17,9 +17,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+      <DataContextProvider>
       <Navbar/>
       {children}
-      
+      </DataContextProvider>
       </body>
     </html>
   );

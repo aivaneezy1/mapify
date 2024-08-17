@@ -3,24 +3,24 @@ import * as React from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
-import { useState, useEffect } from "react";
+import { useState, useEffect, SetStateAction, Dispatch } from "react";
 import PlaceDetailsComponent from "./PlaceDetails";
 import Image from "next/image";
+import { PlaceType } from "./RenderMap";
+import Loading from "@/utils/Loading";
+interface ListComponentProp {
+  places: PlaceType[] | null;
+  loading: Boolean;
+  setLoading: React.Dispatch<React.SetStateAction<Boolean>>;
+}
 
-type PlaceType = {
-  name: string;
-  address: string;
-  rating: string;
-  pictures: string[];
-};
-
-const ListComponent = () => {
+const ListComponent = ({ places, loading, setLoading }: ListComponentProp) => {
   // State for selected category and rating
   const [selectedCategory, setSelectedCategory] =
     useState<string>("restaurant");
   const [selectedRating, setSelectedRating] = useState<string>("5");
   const [selectedRadius, setSelectedRadius] = useState<string>("0");
-  const [places, setPlaces] = useState<PlaceType[] | null>(null);
+  const [timeoutReached, setTimeoutReached] = useState<boolean>(false);
   // Categories array
   const categories = [
     {
@@ -100,21 +100,6 @@ const ListComponent = () => {
     },
   ];
 
-  useEffect(() => {
-    const handleGetData = async () => {
-      try {
-        const res = await fetch("/api/restaurantData");
-        const data = await res.json();
-        if (res.ok) {
-          setPlaces(data);
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    //handleGetData();
-  }, []);
-
   // Handle changes to category selection
   const handleCategoryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedCategory(event.target.value);
@@ -129,6 +114,15 @@ const ListComponent = () => {
   const handleRadiusChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedRadius(event.target.value);
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(true);
+    }, 10000);
+
+    return () => clearTimeout(timer);
+  }, [places]);
+
   return (
     <div className="">
       <h2 className="text-2xl font-semibold whitespace-normal">
@@ -200,8 +194,12 @@ const ListComponent = () => {
 
         {/*Calling the palceDetails */}
 
-        {places &&
-          places.length > 0 &&
+        {/* Calling the placeDetails */}
+        {!loading ? (
+          <div className="flex justify-center h-screen items-center">
+            <Loading />
+          </div>
+        ) : places && places.length > 0 ? (
           places.map((item, index) => (
             <div key={index} className="flex gap-10">
               <PlaceDetailsComponent
@@ -211,7 +209,12 @@ const ListComponent = () => {
                 pictures={item.pictures}
               />
             </div>
-          ))}
+          ))
+        ) : (
+          <h2 className="h-screen flex justify-center items-center text-2xl font-bold">
+            No data Found  😔
+          </h2>
+        )}
       </Box>
     </div>
   );

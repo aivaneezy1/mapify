@@ -1,27 +1,22 @@
 // src/Map.tsx
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef,useContext } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
 import SearchBar from "./SearchBar";
+import { DataContext } from "../context/Provider";
+
 const apiKey: string | undefined = process.env.NEXT_PUBLIC_MAPS_API_KEY;
-
-type CoordinatesType = {
-  lat: number;
-  lng: number;
-};
-
 const MapComponent = () => {
   // Longitude – the vertical lines
   // Latitude - the orizzontal lines
+
+  const {coordinates, setCoordinates} = useContext(DataContext)
+
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [marker, setMarker] =
     useState<google.maps.marker.AdvancedMarkerElement | null>(null);
 
-  const [coordinates, setCoordinates] = useState<CoordinatesType>({
-    lat: 0,
-    lng: 0,
-  });
 
   useEffect(() => {
     const initMap = async () => {
@@ -129,87 +124,56 @@ const MapComponent = () => {
         }
       });
 
-      // // Function to get the map bounds and coordinates
-      // const getMapBounds = () => {
-      //   const bounds = mapInstance.getBounds();
-      //   if (bounds) {
-      //     const ne = bounds.getNorthEast(); // Top-right coordinates
-      //     const sw = bounds.getSouthWest(); // Bottom-left coordinates
+    //   // Function to geocode an address(address ---- > latitude and longitude))
+    //   const geocodeAddresses = (
+    //     addresses: string[],
+    //     mapInstance: google.maps.Map
+    //   ) => {
+    //     const geocoder = new google.maps.Geocoder();
 
-      //     const tr_latitude = ne.lat();
-      //     const tr_longitude = ne.lng();
-      //     const bl_latitude = sw.lat();
-      //     const bl_longitude = sw.lng();
-      //     console.log(
-      //       `bl_latitude=${bl_latitude}&bl_longitude=${bl_longitude}&tr_latitude=${tr_latitude}&tr_longitude=${tr_longitude}`
-      //     );
-      //     return {
-      //       bl_latitude: bl_latitude,
-      //       bl_longitude: bl_longitude,
-      //       tr_latitude: tr_latitude,
-      //       tr_longitude: tr_longitude,
-      //     };
-      //   }
-      //   return null;
-      // };
+    //     addresses.forEach((address) => {
+    //       // Geocode takes 2 paramaters(address, callbackFunc)
+    //       geocoder.geocode({ address: address }, (results, status) => {
+    //         if (
+    //           status === google.maps.GeocoderStatus.OK &&
+    //           results &&
+    //           results[0]
+    //         ) {
+    //           const location = results[0].geometry.location;
 
-      // mapInstance.addListener("bounds_changed", () => {
-      //   const bounds = getMapBounds();
-      //   if (bounds) {
+    //           // Create and set a marker on the map for this location
+    //           new google.maps.marker.AdvancedMarkerElement({
+    //             map: mapInstance,
+    //             position: location,
+    //           });
+    //         } else {
+    //           console.error("Geocode failed: " + status);
+    //         }
+    //       });
+    //     });
+    //   };
 
-      //   }
-      // });
+    //   // Example usage with multiple addresses
+    //   const addresses: string[] = [
+    //     "Piazza Giuseppe Garibaldi 11, 56126 Pisa Toscana",
+    //     "Via delle Case Dipinte 6, 56127 Pisa Toscana",
+    //     "Via Santa Maria 30, 56126 Pisa Toscana",
+    //   ];
+    //   geocodeAddresses(addresses, mapInstance);
 
-      // Function to geocode an address(address ---- > latitude and longitude))
-      const geocodeAddresses = (
-        addresses: string[],
-        mapInstance: google.maps.Map
-      ) => {
-        const geocoder = new google.maps.Geocoder();
-
-        addresses.forEach((address) => {
-          geocoder.geocode({ address: address }, (results, status) => {
-            if (
-              status === google.maps.GeocoderStatus.OK &&
-              results &&
-              results[0]
-            ) {
-              const location = results[0].geometry.location;
-
-              // Create and set a marker on the map for this location
-              new google.maps.marker.AdvancedMarkerElement({
-                map: mapInstance,
-                position: location,
-              });
-            } else {
-              console.error("Geocode failed: " + status);
-            }
-          });
-        });
-      };
-
-      // Example usage with multiple addresses
-      const addresses: string[] = [
-        "Piazza Giuseppe Garibaldi 11, 56126 Pisa Toscana",
-        "Via delle Case Dipinte 6, 56127 Pisa Toscana",
-        "Via Santa Maria 30, 56126 Pisa Toscana",
-      ];
-      geocodeAddresses(addresses, mapInstance);
-    };
+    
+     };
 
     initMap();
   }, []);
 
-  useEffect(() => {
-    console.log("coordinates updated:", coordinates);
-  }, [coordinates]);
+  // useEffect(() => {
+  //   console.log("coordinates updated:", coordinates);
+  // }, [coordinates]);
 
   // Handle form submit
   const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    // Trigger autocomplete or map update based on the input value
-    // Example: Here you might use Geocoding API to convert the input to lat/lng
   };
 
   return (

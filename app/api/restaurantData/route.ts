@@ -53,17 +53,25 @@ interface FormattedPlace {
   pictures: string[];
 }
 
-export const GET = async ({
+const API_KEY: string | undefined = process.env.NEXT_PUBLIC_FOURSQAURE_API_KEY
+
+export const handleGetData = async ({
   lat,
   long,
   radius,
   categories,
 }: handleApiProps) => {
+
+   if (!API_KEY) {
+    throw new Error("API_KEY is not defined");
+  }
+
+
   const options = {
     method: "GET",
     headers: {
       accept: "application/json",
-      Authorization: "fsq3QLwaaaOEJE3+jK9EjRMJb6uv7AM/T/kzqaXyRszIs+Q=",
+      Authorization: API_KEY,
     },
   };
 
@@ -73,7 +81,7 @@ export const GET = async ({
 
     // Include the fields parameter in the API request
     const res = await fetch(
-      `https://api.foursquare.com/v3/places/search?ll=43.7085,10.3987&radius=2000&categories=4d4b7105d754a06374d81259&fields=${fields}`,
+      `https://api.foursquare.com/v3/places/search?ll=${lat},${long}&radius=${radius}&categories=${categories}&fields=${fields}`,
       options
     );
     const result: SearchResult = await res.json(); // Parse the response as JSON and use the SearchResult type

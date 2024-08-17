@@ -1,6 +1,7 @@
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { DataContext } from "../context/Provider";
 import {
   Carousel,
   CarouselContent,
