@@ -6,8 +6,10 @@ import MenuItem from "@mui/material/MenuItem";
 import { useState, useEffect, SetStateAction, Dispatch } from "react";
 import PlaceDetailsComponent from "./PlaceDetails";
 import Image from "next/image";
-import { PlaceType } from "./RenderMap";
+import { PlaceType } from "@/types";
 import Loading from "@/utils/Loading";
+
+
 interface ListComponentProp {
   places: PlaceType[] | null;
   loading: Boolean;
@@ -19,8 +21,7 @@ const ListComponent = ({ places, loading, setLoading }: ListComponentProp) => {
   const [selectedCategory, setSelectedCategory] =
     useState<string>("restaurant");
   const [selectedRating, setSelectedRating] = useState<string>("5");
-  const [selectedRadius, setSelectedRadius] = useState<string>("0");
-  const [timeoutReached, setTimeoutReached] = useState<boolean>(false);
+  const [selectedRadius, setSelectedRadius] = useState<string>("");
   // Categories array
   const categories = [
     {
@@ -115,6 +116,8 @@ const ListComponent = ({ places, loading, setLoading }: ListComponentProp) => {
     setSelectedRadius(event.target.value);
   };
 
+
+  // Timer incase theres no data found after 10 secs.
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(true);
@@ -175,6 +178,8 @@ const ListComponent = ({ places, loading, setLoading }: ListComponentProp) => {
           </TextField>
         </div>
 
+
+        {/* Radius Dropdown */}
         <TextField
           id="outlined-select-radius"
           select
@@ -192,7 +197,6 @@ const ListComponent = ({ places, loading, setLoading }: ListComponentProp) => {
           ))}
         </TextField>
 
-        {/*Calling the palceDetails */}
 
         {/* Calling the placeDetails */}
         {!loading ? (

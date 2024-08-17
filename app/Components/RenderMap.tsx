@@ -5,15 +5,8 @@ import MapComponent from "./Map";
 import SearchBar from "./SearchBar";
 import { DataContext } from "../context/Provider";
 import { handleGetData } from "../api/restaurantData/route";
+import { PlaceType } from "@/types";
 
-
-
-export interface PlaceType  {
-  name: string;
-  address: string;
-  rating: string;
-  pictures: string[];
-};
 
 
 const RenderMap = () => {
@@ -35,12 +28,13 @@ const RenderMap = () => {
         const data = await res.json();
         setPlaces(data)
         setLoading(true);
+      ;
         
       } catch (err) {
         console.log(err);
       }
     };
-    //getData()
+    getData()
 
     // call the function when the coordinates change.
   }, [coordinates]);
@@ -59,7 +53,7 @@ const RenderMap = () => {
 
         {/* Container for the MapComponent */}
         <div className="sm:w-full w-1/2">
-          <MapComponent />
+          <MapComponent places={places}/>
         </div>
       </div>
     </>
