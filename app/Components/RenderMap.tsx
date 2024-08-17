@@ -34,7 +34,7 @@ const RenderMap = () => {
         console.log(err);
       }
     };
-    getData()
+    //getData()
 
     // call the function when the coordinates change.
   }, [coordinates]);

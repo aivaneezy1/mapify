@@ -1,4 +1,3 @@
-// src/Map.tsx
 "use client";
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
@@ -14,9 +13,6 @@ interface MapProps {
 }
 
 const MapComponent = ({ places }: MapProps) => {
-  // Longitude – the vertical lines
-  // Latitude - the orizzontal lines
-
   const { coordinates, setCoordinates } = useContext(DataContext);
 
   const mapRef = useRef<HTMLDivElement>(null);
@@ -38,45 +34,37 @@ const MapComponent = ({ places }: MapProps) => {
       )) as google.maps.MarkerLibrary;
       const { Autocomplete } = await loader.importLibrary("places");
 
-      // Default location (fallback)
       const defaultLocation = {
         lat: 41.8719,
         lng: 12.5674,
       };
 
-      // Map options
       const options: google.maps.MapOptions = {
         center: defaultLocation,
         zoom: 15,
         mapId: "NEXT_MAP_LOCATION",
       };
 
-      // Initialize the map
       const mapInstance = new Map(mapRef.current as HTMLDivElement, options);
       setMap(mapInstance);
 
-      // Initialize the marker
       let markerInstance = new AdvancedMarkerElement({
         map: mapInstance,
         position: defaultLocation,
       });
       setMarker(markerInstance);
 
-      // Event listener when a user click a map to put a market
       mapInstance.addListener("click", (event: google.maps.MapMouseEvent) => {
         if (event.latLng) {
           const clickedLocation = {
             lat: event.latLng.lat(),
             lng: event.latLng.lng(),
           };
-          // Update new marker position
           markerInstance.position = clickedLocation;
-          // Update coordinates
           setCoordinates(clickedLocation);
         }
       });
 
-      // User current location
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
@@ -87,9 +75,7 @@ const MapComponent = ({ places }: MapProps) => {
 
             mapInstance.setCenter(userLocation);
             mapInstance.setZoom(15);
-            // Update market to the user current location
             markerInstance.position = userLocation;
-            // Update coordinate to the user current location
             setCoordinates(userLocation);
           },
           () => {
@@ -100,7 +86,6 @@ const MapComponent = ({ places }: MapProps) => {
         console.error("Geolocation is not supported by this browser.");
       }
 
-      // Initialize the Autocomplete functionality
       const autocomplete = new Autocomplete(
         document.getElementById("search-input") as HTMLInputElement,
         {
@@ -108,7 +93,6 @@ const MapComponent = ({ places }: MapProps) => {
         }
       );
 
-      // Event listener when a place is selected from the search suggestions
       autocomplete.addListener("place_changed", () => {
         const place = autocomplete.getPlace();
 
@@ -118,7 +102,6 @@ const MapComponent = ({ places }: MapProps) => {
             lng: place.geometry.location.lng(),
           };
 
-          // Update the map center, marker position and coordinates
           mapInstance.setCenter(newLocation);
           mapInstance.setZoom(15);
           setCoordinates({
@@ -129,57 +112,48 @@ const MapComponent = ({ places }: MapProps) => {
           markerInstance.position = newLocation;
         }
       });
-
-      // Function to geocode an address(address ---- > latitude and longitude))
-      const geocodeAddresses = (
-        addresses: string[], // Updated to accept an array of strings (addresses)
-        mapInstance: google.maps.Map
-      ) => {
-        const geocoder = new google.maps.Geocoder();
-
-        if (addresses && addresses.length > 0) {
-          addresses.forEach((address) => {
-            geocoder.geocode({ address: address }, (results, status) => {
-              if (
-                status === google.maps.GeocoderStatus.OK &&
-                results &&
-                results[0]
-              ) {
-                const location = results[0].geometry.location;
-
-                new google.maps.marker.AdvancedMarkerElement({
-                  map: mapInstance,
-                  position: location,
-                });
-              } else {
-                console.error("Geocode failed: " + status);
-              }
-            });
-          });
-        }
-      };
-
- 
-      if (places) {
-        // Extract the addresses from the places array
-        const addresses = places.map((place) => place.address);
-        console.log("address", addresses)
-        // Call geocodeAddresses with the extracted addresses
-        geocodeAddresses(addresses, mapInstance);
-      }
     };
 
     initMap();
   }, []);
 
-  // useEffect(() => {
-  //   console.log("coordinates updated:", coordinates);
-  // }, [coordinates]);
+  // Geocode the addresses and place markers on the map
+  const geocodeAddresses = (
+    addresses: string[], 
+    mapInstance: google.maps.Map
+  ) => {
+    const geocoder = new google.maps.Geocoder();
 
-  // Handle form submit
-  const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+    if (addresses && addresses.length > 0) {
+      addresses.forEach((address) => {
+        geocoder.geocode({ address: address }, (results, status) => {
+          if (
+            status === google.maps.GeocoderStatus.OK &&
+            results &&
+            results[0]
+          ) {
+            const location = results[0].geometry.location;
+
+            new google.maps.marker.AdvancedMarkerElement({
+              map: mapInstance,
+              position: location,
+            });
+          } else {
+            console.error("Geocode failed: " + status);
+          }
+        });
+      });
+    }
   };
+
+  // Watch for changes to places and update the markers
+  useEffect(() => {
+    if (places && map) {
+      const addresses = places.map((place) => place.address);
+      geocodeAddresses(addresses, map);
+    }
+  }, [places, map]);
+
 
   return (
     <div
@@ -187,7 +161,7 @@ const MapComponent = ({ places }: MapProps) => {
       ref={mapRef}
     >
       <form
-        onSubmit={handleSearch}
+        onSubmit={(event) => event.preventDefault()}
         className="w-full max-w-md mb-6 p-4 bg-white rounded-lg shadow-lg"
       ></form>
     </div>
