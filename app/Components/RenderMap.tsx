@@ -12,9 +12,11 @@ import { PlaceType } from "@/types";
 const RenderMap = () => {
   const [places, setPlaces] = useState<PlaceType[] | null>(null)
   const [loading, setLoading] = useState<Boolean>(false)
-  const { coordinates } = useContext(DataContext);
+  const { coordinates,  selectedCategory,  selectedRadius} = useContext(DataContext);
   const lat = coordinates.lat.toString();
   const lng = coordinates.lng.toString();
+
+
 
   useEffect(() => {
     const getData = async () => {
@@ -23,7 +25,7 @@ const RenderMap = () => {
           lat: lat,
           long: lng,
           radius: 2000,
-          categories: "4d4b7105d754a06374d81259",
+          categories: selectedCategory,
         });
         const data = await res.json();
         setPlaces(data)
@@ -37,7 +39,7 @@ const RenderMap = () => {
     //getData()
 
     // call the function when the coordinates change.
-  }, [coordinates]);
+  }, [coordinates,selectedCategory,selectedRadius]);
 
   return (
     <>
