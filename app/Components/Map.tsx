@@ -13,7 +13,8 @@ interface MapProps {
 }
 
 const MapComponent = ({ places }: MapProps) => {
-  const { coordinates, setCoordinates, selectedCategory } = useContext(DataContext);
+  const { coordinates, setCoordinates, selectedCategory } =
+    useContext(DataContext);
 
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -22,8 +23,10 @@ const MapComponent = ({ places }: MapProps) => {
   const [infoWindow, setInfoWindow] = useState<google.maps.InfoWindow | null>(
     null
   );
-   const mapLibraries = useRef<{ AdvancedMarkerElement: any, Autocomplete: any} | null>(null);
-
+  const mapLibraries = useRef<{
+    AdvancedMarkerElement: any;
+    Autocomplete: any;
+  } | null>(null);
 
   useEffect(() => {
     const initMap = async () => {
@@ -39,12 +42,9 @@ const MapComponent = ({ places }: MapProps) => {
       )) as google.maps.MarkerLibrary;
       const { Autocomplete } = await loader.importLibrary("places");
 
-
-    
       // USING ref
-       mapLibraries.current = { AdvancedMarkerElement, Autocomplete };
+      mapLibraries.current = { AdvancedMarkerElement, Autocomplete };
 
-      
       const defaultLocation = {
         lat: 41.8719,
         lng: 12.5674,
@@ -72,11 +72,9 @@ const MapComponent = ({ places }: MapProps) => {
         "url('https://aivan-image.s3.eu-north-1.amazonaws.com/mapImage/man.png')";
       customMarkerContent.style.backgroundSize = "contain";
       customMarkerContent.style.backgroundRepeat = "no-repeat";
-     
 
       markerInstance.content = customMarkerContent;
       setMarker(markerInstance);
-
 
       const infoWindowInstance = new google.maps.InfoWindow({
         content:
@@ -175,53 +173,64 @@ const MapComponent = ({ places }: MapProps) => {
     initMap();
   }, []);
 
+  const [markers, setMarkers] = useState<google.maps.marker.AdvancedMarkerElement[]>([]);
+  const customIcons = () => {
+    let url: string = "";
 
-  // custom icon for addresses
-  const customIcons = () =>{
-     let url:string = ""
-     switch(selectedCategory){
-
+    switch (selectedCategory) {
       // Restaurant
       case "4d4b7105d754a06374d81259":
-      url = 'https://aivan-image.s3.eu-north-1.amazonaws.com/mapImage/restaurant.png'
+        url =
+          "https://aivan-image.s3.eu-north-1.amazonaws.com/mapImage/restaurant.png";
         break;
 
-        // Hotel
-        case "4bf58dd8d48988d1fa931735":
-        url = "https://aivan-image.s3.eu-north-1.amazonaws.com/mapImage/hotel.png";
+      // Hotel
+      case "4bf58dd8d48988d1fa931735":
+        url =
+          "https://aivan-image.s3.eu-north-1.amazonaws.com/mapImage/hotel.png";
         break;
 
-        // Parking
-        case "4c38df4de52ce0d596b336e1":
-        url = "https://aivan-image.s3.eu-north-1.amazonaws.com/mapImage/placeholder.png";
+      // Parking
+      case "4c38df4de52ce0d596b336e1":
+        url =
+          "https://aivan-image.s3.eu-north-1.amazonaws.com/mapImage/placeholder.png";
         break;
 
-        // Atrractipn
-        case "5109983191d435c0d71c2bb1":
-        url = "https://aivan-image.s3.eu-north-1.amazonaws.com/mapImage/park.png";
+      // Attraction
+      case "5109983191d435c0d71c2bb1":
+        url =
+          "https://aivan-image.s3.eu-north-1.amazonaws.com/mapImage/park.png";
         break;
 
-        // Night Club
-        case "4bf58dd8d48988d11f941735":
-        url = "https://aivan-image.s3.eu-north-1.amazonaws.com/mapImage/location.png";
+      // Night Club
+      case "4bf58dd8d48988d11f941735":
+        url =
+          "https://aivan-image.s3.eu-north-1.amazonaws.com/mapImage/location.png";
         break;
 
-        default:
-        url = ""
+      default:
+        url = "";
         break;
-     }
-     return url;
-  }
+    }
+    console.log("selected", selectedCategory);
+    return url;
+  };
 
   const geocodeAddresses = (
     places: PlaceType[],
     mapInstance: google.maps.Map
   ) => {
-
-   
     if (mapLibraries.current && mapLibraries.current.AdvancedMarkerElement) {
       const { AdvancedMarkerElement } = mapLibraries.current;
       const geocoder = new google.maps.Geocoder();
+
+      // Clear previous markers
+    if (markers.length > 0) {
+      // .map on which to display the marker.
+      markers.forEach((marker) => marker.map = null); // Remove the marker from the map
+      setMarkers([]);
+    }
+      
     
       if (places && places.length > 0) {
         places.forEach((place, index) => {
@@ -232,14 +241,13 @@ const MapComponent = ({ places }: MapProps) => {
               results[0]
             ) {
               const location = results[0].geometry.location;
-
               const infoWindowContent = `
-                <div style="display: flex; flex-direction: column; align-items: center; max-width: 250px; background-color: #f9f9f9; padding: 15px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-                  <h3 style="font-size: 1.2em; color: #333; margin-bottom: 10px; text-align: center; font-weight:bold;">${place.name}</h3>
-                  <img src="${place.pictures[0]}" alt="Restaurant Image" style="width: 80%; height: auto; object-fit: cover; border-radius: 10px; margin-bottom: 10px; border: 1px solid #ddd;" />
-                  <p style="font-size: 1em; color: #666; margin: 0;">Rating: <span style="color: #ff9800; font-weight: bold;">${place.rating}</span></p>
-                </div>
-              `;
+              <div style="display: flex; flex-direction: column; align-items: center; max-width: 250px; background-color: #f9f9f9; padding: 15px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                <h3 style="font-size: 1.2em; color: #333; margin-bottom: 10px; text-align: center; font-weight:bold;">${place.name}</h3>
+                <img src="${place.pictures[0]}" alt="Restaurant Image" style="width: 80%; height: auto; object-fit: cover; border-radius: 10px; margin-bottom: 10px; border: 1px solid #ddd;" />
+                <p style="font-size: 1em; color: #666; margin: 0;">Rating: <span style="color: #ff9800; font-weight: bold;">${place.rating}</span></p>
+              </div>
+            `;
 
               const infoWindow = new google.maps.InfoWindow({
                 content: infoWindowContent,
@@ -259,7 +267,8 @@ const MapComponent = ({ places }: MapProps) => {
                 content: customMarkerContent,
               });
 
-              
+              // Update the markers state
+              setMarkers((prevMarkers) => [...prevMarkers, marker]);
 
               marker.addListener("click", () => {
                 infoWindow.open(mapInstance, marker);
@@ -272,7 +281,6 @@ const MapComponent = ({ places }: MapProps) => {
       }
     }
   };
-
   useEffect(() => {
     if (places && map) {
       geocodeAddresses(places, map);
